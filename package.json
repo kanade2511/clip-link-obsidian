@@ -1,11 +1,11 @@
 {
   "name": "clip-link-obsidian",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Copy text to clipboard via clip: scheme links",
   "main": "main.js",
   "scripts": {
-    "dev": "bun build src/main.ts --outfile=main.js --external=obsidian --external=@codemirror/language --external=@codemirror/view --target=node --format=cjs --watch",
-    "build": "bun build src/main.ts --outfile=main.js --external=obsidian --external=@codemirror/language --external=@codemirror/view --target=node --format=cjs --minify",
+    "dev": "bun build src/main.ts --outfile=main.js --external=obsidian --external=@codemirror/view --external=@codemirror/language --target=node --format=cjs --watch",
+    "build": "bun build src/main.ts --outfile=main.js --external=obsidian --external=@codemirror/view --external=@codemirror/language --target=node --format=cjs --minify",
     "typecheck": "tsc --noEmit"
   },
   "keywords": ["obsidian", "plugin"],
