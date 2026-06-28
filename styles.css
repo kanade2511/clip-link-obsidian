@@ -1,0 +1,22 @@
+/* Reading View: <a> elements */
+a[href^="clip:"] {
+	color: var(--color-cyan);
+	cursor: copy;
+}
+a[href^="clip:"]:hover {
+	opacity: 0.8;
+}
+
+/* Post-processor anchor styling */
+.clip-link-anchor {
+	color: var(--color-cyan);
+	cursor: copy;
+}
+
+/* Editing View (Live Preview): applied by ViewPlugin decoration */
+.clip-link-text {
+	color: var(--color-cyan) !important;
+}
+.clip-link-text .cm-underline {
+	color: var(--color-cyan) !important;
+}

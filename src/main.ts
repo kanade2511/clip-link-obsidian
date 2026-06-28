@@ -87,9 +87,8 @@ export default class ClipLinkPlugin extends Plugin {
 
 			if (isEditing) {
 				// ========== Editing View (Live Preview / Source) ==========
-				// Styled by ViewPlugin which adds .clip-link-text to the
-				// cm-underline span → CSS .clip-link-text / .clip-link-text .cm-underline.
-				const cm = (view.editor as any)?.cm;
+				// @ts-expect-error - cm is an internal bridge property
+				const cm = view.editor.cm;
 				if (!cm) return;
 
 				const pos = cm.posAtCoords({ x: e.clientX, y: e.clientY });
@@ -110,7 +109,7 @@ export default class ClipLinkPlugin extends Plugin {
 				}
 			} else {
 				// ========== Reading View ==========
-				// Styled by CSS a[href^="clip:"] (injected in <style> below).
+				// Styled by CSS a[href^="clip:"] (in styles.css).
 				const link = (e.target as HTMLElement).closest('a');
 				if (!link) return;
 
@@ -129,7 +128,8 @@ export default class ClipLinkPlugin extends Plugin {
 		// Obsidian's renderer leaves unknown schemes as raw text, so we
 		// create clickable <a> elements via a markdown post-processor.
 		this.registerMarkdownPostProcessor((el) => {
-			const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+			const doc = el.ownerDocument;
+			const walker = doc.createTreeWalker(el, NodeFilter.SHOW_TEXT);
 			const textNodes: Text[] = [];
 			while (walker.nextNode()) textNodes.push(walker.currentNode as Text);
 
@@ -137,13 +137,12 @@ export default class ClipLinkPlugin extends Plugin {
 				const m = node.textContent?.match(/\[([^\]]*)\]\(clip:\s*([^)]+)\)/);
 				if (!m) continue;
 
-				const before = document.createTextNode(node.textContent!.slice(0, m.index));
-				const anchor = document.createElement('a');
+				const before = doc.createTextNode(node.textContent!.slice(0, m.index));
+				const anchor = doc.createElement('a');
 				anchor.href = `clip:${m[2]}`;
 				anchor.textContent = m[1];
-				anchor.style.color = 'var(--color-cyan)';
-				anchor.style.cursor = 'copy';
-				const after = document.createTextNode(
+				anchor.className = 'clip-link-anchor';
+				const after = doc.createTextNode(
 					node.textContent!.slice(m.index! + m[0].length),
 				);
 
@@ -153,19 +152,5 @@ export default class ClipLinkPlugin extends Plugin {
 				node.parentNode!.removeChild(node);
 			}
 		});
-
-		// --- Injected styles ---
-		const style = document.createElement('style');
-		style.id = 'clip-link-styles';
-		style.textContent = [
-			// Reading View (<a href="clip:…">)  — selector works on HTML <a>
-			'a[href^="clip:"] { color: var(--color-cyan); cursor: copy; }',
-			'a[href^="clip:"]:hover { opacity: 0.8; }',
-			// Editing View (CM6 span) — applied by ViewPlugin decoration
-			'.clip-link-text { color: var(--color-cyan) !important; }',
-			'.clip-link-text .cm-underline { color: var(--color-cyan) !important; }',
-		].join('\n');
-		document.head.appendChild(style);
-		this.register(() => style.remove());
 	}
 }
